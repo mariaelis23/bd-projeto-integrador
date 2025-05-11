@@ -1,0 +1,68 @@
+-- Tabela de usuários
+CREATE TABLE usuario (
+    id SERIAL PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    senha VARCHAR(255) NOT NULL,
+    telefone VARCHAR(20),
+    endereco VARCHAR(255),
+    cidade VARCHAR(100),         -- Adicionado
+    estado VARCHAR(2)            -- Adicionado
+);
+
+-- Tabela cliente (herança lógica)
+CREATE TABLE cliente (
+    id INT PRIMARY KEY REFERENCES usuario(id)
+);
+
+-- Tabela prestador (herança lógica)
+CREATE TABLE prestador (
+    id INT PRIMARY KEY REFERENCES usuario(id),
+    area_atuacao VARCHAR(100)
+);
+
+-- Tabela de serviços oferecidos
+CREATE TABLE servico (
+    id SERIAL PRIMARY KEY,
+    prestador_id INT NOT NULL REFERENCES prestador(id),
+    titulo VARCHAR(100) NOT NULL,
+    descricao TEXT,
+    preco DECIMAL(10,2) NOT NULL
+);
+
+-- Tabela de solicitações de serviço
+CREATE TABLE solicitacao_servico (
+    id SERIAL PRIMARY KEY,
+    cliente_id INT NOT NULL REFERENCES cliente(id),
+    prestador_id INT NOT NULL REFERENCES prestador(id),
+    data_solicitacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    mensagem TEXT,
+    status VARCHAR(20) NOT NULL CHECK (status IN ('pendente', 'aceita', 'recusada', 'concluida'))
+);
+
+-- Tabela de avaliações
+CREATE TABLE avaliacao (
+    id SERIAL PRIMARY KEY,
+    cliente_id INT NOT NULL REFERENCES cliente(id),
+    prestador_id INT NOT NULL REFERENCES prestador(id),
+    nota INT NOT NULL CHECK (nota BETWEEN 1 AND 5),
+    comentario TEXT,
+    data DATE NOT NULL
+);
+
+-- Tabela de mensagens entre cliente e prestador
+CREATE TABLE mensagem (
+    id SERIAL PRIMARY KEY,
+    cliente_id INT NOT NULL REFERENCES cliente(id),
+    prestador_id INT NOT NULL REFERENCES prestador(id),
+    conteudo TEXT NOT NULL,
+    data TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela para registros de ações: login/exclusão de conta/ alteração de dados
+CREATE TABLE log_acao (
+    id SERIAL PRIMARY KEY,
+    usuario_id INT REFERENCES usuario(id),
+    acao TEXT NOT NULL,
+    data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
